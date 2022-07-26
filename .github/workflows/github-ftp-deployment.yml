@@ -12,7 +12,7 @@ jobs:
       - name: FTP Deploying
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
-          server: ftp://ftp.dlptest.com/
+          server: ftp.dlptest.com
           username: dlpuser
           password: ${{ secrets.password }}
 

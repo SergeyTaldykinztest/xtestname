@@ -1,0 +1,46 @@
+jobs:
+  Deployment:
+    name: Deploy project on push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Create env file
+        run: |
+            touch .env
+            echo APP_NAME=MyAppName >> .env
+            echo APP_ENV=production >> .env
+            echo APP_DEBUG=false >> .env
+            echo LOG_CHANNEL=daily >> .env
+            echo DB_DATABASE=${{ secrets.DEV_DB_DATABASE }} >> .env
+            echo DB_USERNAME=${{ secrets.DEV_DB_USERNAME }} >> .env
+            echo DB_PASSWORD=${{ secrets.DEV_DB_PASSWORD }} >> .env
+            echo "!.env" > .git-ftp-include
+
+      - name: Cache dependencies
+        uses: actions/cache@v1
+        with:
+          path: ~/.composer/cache/files
+          key: dependencies-composer-${{ hashFiles('composer.json') }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.3
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-suggest
+
+      - name: Adding Vendor
+        run: echo "!vendor/" > .git-ftp-include
+
+      - name: FTP Deploying
+          uses: SamKirkland/FTP-Deploy-Action@4.3.0
+          with:
+            server: ftp.samkirkland.com
+            username: myFtpUserName
+            password: ${{ secrets.password }}

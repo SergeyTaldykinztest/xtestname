@@ -1,4 +1,4 @@
-name: GitHub Actions Demo
+name: GitHub Ftp Deployment
 on: [workflow_dispatch]
 jobs:
   FTP-Deployment:
